@@ -35,3 +35,38 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .error-text { color: #b42318; }
 .status-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .legend-item { background: #eef2f7; border-radius: 999px; padding: 2px 10px; }
+.legend-bad { background: #fee4e2; color: #b42318; }
+.tag { display: inline-block; border-radius: 4px; padding: 0 6px; font-size: 11px; margin-left: 6px; }
+.tag-bad { background: #fee4e2; color: #b42318; }
+.cell-note { margin: 2px 0 0; font-size: 11px; color: var(--muted); }
+.row-clickable { cursor: pointer; }
+.ledger-section { margin-top: 20px; }
+.ledger-head { margin-bottom: 8px; }
+.ledger-head h3 { margin: 0 0 4px; font-size: 15px; }
+.stat-bad .stat-value { color: #b42318; }
+
+.modal-mask, .drawer-mask {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 50;
+}
+.modal {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 520px; max-width: calc(100vw - 32px); max-height: 86vh; overflow: auto;
+  background: #fff; border-radius: 10px; padding: 18px 20px;
+}
+.modal h3, .drawer-head h3 { margin: 0 0 8px; font-size: 16px; }
+.modal-tip { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+.modal-form { display: flex; flex-direction: column; gap: 10px; }
+.form-item span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.form-item input, .form-item select {
+  width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 13px;
+}
+.modal-actions, .drawer-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.drawer {
+  position: absolute; top: 0; right: 0; height: 100%; width: 420px; max-width: calc(100vw - 24px);
+  background: #fff; padding: 18px 20px; overflow: auto; box-shadow: -8px 0 24px rgba(15, 23, 42, 0.15);
+}
+.drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.detail-list { margin: 0; }
+.detail-item { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+.detail-item dt { color: var(--muted); margin: 0; flex-shrink: 0; }
+.detail-item dd { margin: 0; text-align: right; word-break: break-all; }
