@@ -67,19 +67,47 @@
       <span>共 {{ total }} 条避险场所记录</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
     </footer>
+
+    <h3 class="section-title">转移核对台账（避险场所接收记录）</h3>
+    <p class="page-desc">受威胁对象确认转移后，转移结果一次落库并在此添记一条核对项；转移人数须与对象详情中的涉及人数一致。</p>
+    <table class="data-table ledger-table">
+      <thead>
+        <tr>
+          <th>台账编号</th><th>对象编号</th><th>对象类型</th><th>对象名称</th>
+          <th>接收场所</th><th>转移人数</th><th>复测距离</th><th>转移日期</th><th>核对结果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in ledger" :key="item.id">
+          <td>{{ item.id }}</td>
+          <td>{{ item.对象编号 }}</td>
+          <td>{{ item.对象类型 }}</td>
+          <td>{{ item.对象名称 }}</td>
+          <td>{{ item.场所编号 }} · {{ item.场所名称 }}</td>
+          <td>{{ item.转移人数 }}</td>
+          <td>{{ item.复测距离 }} 米</td>
+          <td>{{ item.转移日期 }}</td>
+          <td :class="item.核对结果 === '人数一致' ? 'ok-text' : 'error-text'">{{ item.核对结果 }}</td>
+        </tr>
+        <tr v-if="!ledger.length">
+          <td colspan="9" class="empty-state">暂无转移核对项</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import { transferLedger } from '@/api/threat-service'
 import {
   downloadEntries,
   listEntries,
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
-import type { EntryRow } from '@/data/types'
+import type { EntryRow, TransferLedgerEntry } from '@/data/types'
 
 const meta = moduleMeta('refuge')
 const columns = ["场所编号", "场所名称", "可容纳人数", "开放条件", "场所负责人", "联系电话", "启用日期", "场所状态"]
@@ -89,6 +117,7 @@ const stats = [{"label": "可启用场所", "value": 0}, {"label": "已启用场
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
+const ledger = ref<TransferLedgerEntry[]>([])
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
@@ -128,6 +157,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    ledger.value = transferLedger()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '避险场所列表读取失败'
   }
@@ -135,3 +165,9 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.section-title { font-size: 14px; margin: 20px 0 6px; }
+.ledger-table { margin-top: 8px; }
+.ok-text { color: #067647; }
+</style>

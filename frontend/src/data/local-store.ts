@@ -2,7 +2,8 @@ import { SEED_ROWS } from './seed'
 import type { EntryRow } from './types'
 
 // 本地持久化：数据放在 localStorage 里，刷新、关掉再打开都还在。
-const STORAGE_KEY = 'geohazard-patrol:entries'
+// 升级种子/口径时抬版本号，旧缓存整体作废，避免重开页面时旧值回潮把新数字压回去。
+const STORAGE_KEY = 'geohazard-patrol:entries:v2'
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
@@ -20,7 +21,14 @@ function readStorage(): Record<string, EntryRow[]> {
   }
   try {
     const parsed = JSON.parse(raw) as Record<string, EntryRow[]>
-    return { ...fallback, ...parsed }
+    // 逐模块与种子合并：新增模块在旧缓存里没有时补上种子。
+    const merged: Record<string, EntryRow[]> = { ...fallback }
+    for (const key of Object.keys(fallback)) {
+      if (Array.isArray(parsed[key])) {
+        merged[key] = parsed[key]
+      }
+    }
+    return merged
   } catch {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback))
     return fallback
@@ -41,7 +49,20 @@ export function listRows(key: string): EntryRow[] {
 }
 
 export function saveRows(key: string, rows: EntryRow[]): void {
-  const next = { ...allRows(), [key]: rows }
+  saveAll({ [key]: rows })
+}
+
+/**
+ * 一次落库：多模块联动（如受威胁对象转移 + 避险场所台账核对项）合并为一次写入，
+ * 列表与详情共用同一份持久化结果，不允许先改内存再分别保存。
+ */
+export function saveAll(patch: Partial<Record<string, EntryRow[]>>): void {
+  const next: Record<string, EntryRow[]> = { ...allRows() }
+  for (const [key, value] of Object.entries(patch)) {
+    if (value !== undefined) {
+      next[key] = value
+    }
+  }
   cache = next
   if (typeof window !== 'undefined' && window.localStorage) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
